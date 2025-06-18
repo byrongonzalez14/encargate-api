@@ -10,11 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: 'localhost',
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
+  ssl: true,
 });
 
 app.post('/subscribe', async (req, res) => {
@@ -43,5 +44,9 @@ app.get('/subscribers', async (req, res) => {
         console.error('Error al obtener suscriptores:', error);
         res.status(500).json({ message: 'Error al obtener suscriptores' });
     }
+});
+
+app.get('/', (req, res) => {
+  res.send('Encárgate API funcionando ✅');
 });
 
