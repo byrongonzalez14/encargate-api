@@ -16,15 +16,24 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
+  user: "encargate_registro_user",
+  host: "dpg-d19eckvdiees73asgl0g-a.oregon-postgres.render.com",
+  database: "encargate_registro",
+  password: "ztsUEWKE4HfDvBnDqnX902pEJYRPYLQy",
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+console.log("DB CONFIG:", {
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
-  ssl: {
-    rejectUnauthorized: false, // ← Esto es lo importante
-  },
 });
+
 
 app.post("/subscribe", async (req, res) => {
   const { email } = req.body;
