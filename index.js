@@ -18,18 +18,16 @@ const pool = new Pool({
   ssl: true,
 });
 
-app.post('/subscribe', async (req, res) => {
-    const { email } = req.body;
+app.post("/subscribe", async (req, res) => {
+  const { email } = req.body;
 
-    if (!email) return res.status(400).json({ message: 'Email requerido' });
-
-    try {
-        await pool.query('INSERT INTO subscribers (email) VALUES ($1)', [email]);
-        res.status(200).json({ message: 'Correo registrado correctamente' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Error al registrar el correo' });
-    }
+  try {
+    await pool.query("INSERT INTO subscribers (email) VALUES ($1)", [email]);
+    res.status(201).json({ message: "Correo registrado exitosamente" });
+  } catch (error) {
+    console.error("Error al registrar el correo:", error); // agrega esto
+    res.status(500).json({ message: "Error al registrar el correo", error: error.message });
+  }
 });
 
 app.listen(port, () => {
