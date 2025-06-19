@@ -20,24 +20,15 @@ const pool = new Pool({
   },
 });
 
-console.log("DB CONFIG:", {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
-});
-
-
 app.post("/subscribe", async (req, res) => {
-  const { email } = req.body;
+  const { phone } = req.body;
 
   try {
-    await pool.query("INSERT INTO subscribers (email) VALUES ($1)", [email]);
-    res.status(201).json({ message: "Correo registrado exitosamente" });
+    await pool.query("INSERT INTO subscribers (phone) VALUES ($1)", [phone]);
+    res.status(201).json({ message: "Número registrado exitosamente" });
   } catch (error) {
-    console.error("Error al registrar el correo:", error); // agrega esto
-    res.status(500).json({ message: "Error al registrar el correo", error: error.message });
+    console.error("Error al registrar el número:", error);
+    res.status(500).json({ message: "Error al registrar el número", error: error.message });
   }
 });
 
@@ -46,13 +37,13 @@ app.listen(port, () => {
 });
 
 app.get('/subscribers', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM subscribers ORDER BY id DESC');
-        res.status(200).json(result.rows);
-    } catch (error) {
-        console.error('Error al obtener suscriptores:', error);
-        res.status(500).json({ message: 'Error al obtener suscriptores' });
-    }
+  try {
+    const result = await pool.query('SELECT * FROM subscribers ORDER BY id DESC');
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener números:', error);
+    res.status(500).json({ message: 'Error al obtener números' });
+  }
 });
 
 app.get('/', (req, res) => {
