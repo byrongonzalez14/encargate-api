@@ -32,17 +32,20 @@ app.post("/subscribe", async (req, res) => {
   }
 
   try {
-    // Enviar datos al webhook de n8n
-    const n8nResponse = await axios.post('http://localhost:5678/webhook/formulario', {
-      nombre,
-      correo,
-      celular
-    }, {
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // MODO PRODUCCIÓN: Comentar n8n temporalmente (n8n no disponible en Render)
+    console.log(`📝 Datos recibidos en producción: ${nombre} - ${correo} - ${celular}`);
+    
+    // TODO: Configurar n8n en producción o usar webhook público
+    // const n8nResponse = await axios.post('http://localhost:5678/webhook/formulario', {
+    //   nombre,
+    //   correo,
+    //   celular
+    // }, {
+    //   timeout: 10000,
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
 
     console.log(`✅ Registro exitoso: ${nombre} - ${correo}`);
 
