@@ -2,24 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { Pool } = require('pg');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
+const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/formulario';
 
 app.use(cors());
 app.use(express.json());
 
-const pool = new Pool({
-  user: "encargate_registro_user",
-  host: "dpg-d19eckvdiees73asgl0g-a.oregon-postgres.render.com",
-  database: "encargate_registro",
-  password: "ztsUEWKE4HfDvBnDqnX902pEJYRPYLQy",
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 app.post("/subscribe", async (req, res) => {
   const { nombre, correo, celular } = req.body;
@@ -32,25 +22,26 @@ app.post("/subscribe", async (req, res) => {
   }
 
   try {
-    // MODO PRODUCCIÓN: Comentar n8n temporalmente (n8n no disponible en Render)
-    console.log(`📝 Datos recibidos en producción: ${nombre} - ${correo} - ${celular}`);
+    // Enviar datos al webhook de n8n
+    console.log(`📝 Enviando datos a n8n: ${nombre} - ${correo} - ${celular}`);
+    console.log(`🔗 URL del webhook: ${n8nWebhookUrl}`);
     
-    // TODO: Configurar n8n en producción o usar webhook público
-    // const n8nResponse = await axios.post('http://localhost:5678/webhook/formulario', {
-    //   nombre,
-    //   correo,
-    //   celular
-    // }, {
-    //   timeout: 10000,
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // });
+    const n8nResponse = await axios.post(n8nWebhookUrl, {
+      nombre,
+      correo,
+      celular
+    }, {
+      timeout: 30000, // Aumentado a 30 segundos para conexiones externas
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
-    console.log(`✅ Registro exitoso: ${nombre} - ${correo}`);
+    console.log(`✅ Respuesta de n8n:`, n8nResponse.status, n8nResponse.data);
 
     res.status(201).json({ 
-      message: "Información registrada exitosamente"
+      message: "Información registrada exitosamente",
+      n8nStatus: n8nResponse.status
     });
   } catch (error) {
     console.error(`❌ Error al procesar registro de ${nombre}:`, error.message);
@@ -74,21 +65,15 @@ app.post("/subscribe", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-    console.log(`🚀 Servidor escuchando en puerto:${port}`);
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok',
+    message: 'Encárgate API funcionando ✅',
+    n8nConfigured: !!process.env.N8N_WEBHOOK_URL
+  });
 });
 
-// Endpoints comentados para referencia
-// app.get('/subscribers', async (req, res) => {
-//   try {
-//     const result = await pool.query('SELECT * FROM subscribers ORDER BY id DESC');
-//     res.status(200).json(result.rows);
-//   } catch (error) {
-//     console.error('Error al obtener números:', error);
-//     res.status(500).json({ message: 'Error al obtener números' });
-//   }
-// });
-
-// app.get('/', (req, res) => {
-//   res.send('Encárgate API funcionando ✅');
-// });
+app.listen(port, () => {
+    console.log(`🚀 Servidor escuchando en puerto:${port}`);
+    console.log(`🔗 Webhook n8n configurado: ${n8nWebhookUrl}`);
+});
